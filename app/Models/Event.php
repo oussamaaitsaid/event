@@ -20,6 +20,9 @@ class Event extends Model
         'status',
         'user_id'
     ];
+    protected $casts = [
+        'date' => 'datetime',
+    ];
 
     public function organizer()
     {

@@ -19,6 +19,7 @@ class User extends Authenticatable
         'role',
         'status'
     ];
+    protected $rememberTokenName = null;
 
     protected $hidden = [
         'password'
