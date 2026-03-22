@@ -3,6 +3,9 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\RegistrationController;
+use App\Http\Controllers\OrganizerController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -48,3 +51,30 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::patch('/users/{user}/role',  [AdminController::class, 'changeRole'])->name('users.role');
     Route::delete('/events/{event}',    [AdminController::class, 'deleteEvent'])->name('events.delete');
 });
+
+
+
+
+// ── User & Organizer Dashboard ──
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', [UserController::class, 'dashboard'])->name('dashboard');
+
+    // Registrations
+    Route::post('/events/{event}/register', [RegistrationController::class, 'store'])->name('register.event');
+    Route::patch('/registrations/{registration}/cancel', [RegistrationController::class, 'cancel'])->name('register.cancel');
+});
+
+
+
+
+// ── Organizer only ──
+Route::middleware(['auth', 'role:organizer'])->prefix('organizer')->name('organizer.')->group(function () {
+    Route::get('/events',                    [OrganizerController::class, 'index'])->name('events');
+    Route::get('/events/create',             [OrganizerController::class, 'create'])->name('events.create');
+    Route::post('/events',                   [OrganizerController::class, 'store'])->name('events.store');
+    Route::get('/events/{event}/edit',       [OrganizerController::class, 'edit'])->name('events.edit');
+    Route::put('/events/{event}',            [OrganizerController::class, 'update'])->name('events.update');
+    Route::delete('/events/{event}',         [OrganizerController::class, 'destroy'])->name('events.destroy');
+    Route::get('/events/{event}/participants',[OrganizerController::class, 'participants'])->name('events.participants');
+});
+

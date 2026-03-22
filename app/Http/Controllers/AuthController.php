@@ -37,11 +37,11 @@ public function login(Request $request)
 
     if (Auth::attempt($credentials)) {
         $request->session()->regenerate();
-        return redirect()->intended(route(match(Auth::user()->role) {
-            'admin'     => 'admin.dashboard',
-            'organizer' => 'dashboard',
-            default     => 'dashboard',
-        }));
+       return redirect()->intended(route(match(Auth::user()->role) {
+        'admin'     => 'admin.dashboard',
+        'organizer' => 'organizer.events',   // ✅ changed
+        default     => 'dashboard',
+    }));
     }
 
     return back()->withErrors([

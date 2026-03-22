@@ -13,6 +13,7 @@ class EventController extends Controller
      */
     public function index()
     {
+        
         $events = Event::with('organizer:id,name')
             ->where('status', 'open')
             ->orderBy('date', 'asc')

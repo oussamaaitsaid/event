@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Event;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -11,6 +12,10 @@ class HandleInertiaRequests extends Middleware
 
     public function share(Request $request): array
     {
+          Event::where('status', 'open')
+            ->where('date', '<', now())
+            ->update(['status' => 'finished']);
+            
         return array_merge(parent::share($request), [
             'auth' => [
                 'user' => $request->user() ? [

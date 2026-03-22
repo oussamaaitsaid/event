@@ -411,5 +411,5 @@ function getCapacityFillClass(event) {
 </script>
 
 <style scoped>
-@import './css/Landing.css';
+@import "./css/Landing.css";
 </style>
