@@ -6,8 +6,15 @@
         <a href="/" class="logo">⚡ EventHub</a>
       </div>
 
-      <h1 class="auth-title">Create your account</h1>
-      <p class="auth-sub">Join EventHub and start exploring events</p>
+      <!-- Language Switcher -->
+      <div class="lang-switcher">
+        <button class="lang-btn" :class="{ active: locale === 'en' }" @click="switchLang('en')">EN</button>
+        <span class="lang-sep">|</span>
+        <button class="lang-btn" :class="{ active: locale === 'fr' }" @click="switchLang('fr')">FR</button>
+      </div>
+
+      <h1 class="auth-title">{{ t('register.title') }}</h1>
+      <p class="auth-sub">{{ t('register.sub') }}</p>
 
       <!-- Errors -->
       <div v-if="Object.keys(form.errors).length" class="alert-error">
@@ -18,7 +25,7 @@
 
         <!-- Name -->
         <div class="field">
-          <label>Full Name</label>
+          <label>{{ t('register.name') }}</label>
           <input
             v-model="form.name"
             type="text"
@@ -30,11 +37,11 @@
 
         <!-- Email -->
         <div class="field">
-          <label>Email address</label>
+          <label>{{ t('register.email') }}</label>
           <input
             v-model="form.email"
             type="email"
-            placeholder="you@example.com"
+            placeholder="example@gmail.com"
             autocomplete="email"
             :class="{ 'input-error': form.errors.email }"
           />
@@ -42,32 +49,26 @@
 
         <!-- Role -->
         <div class="field">
-          <label>I want to join as</label>
+          <label>{{ t('register.joinAs') }}</label>
           <div class="role-grid">
-            <label
-              class="role-option"
-              :class="{ active: form.role === 'user' }"
-            >
+            <label class="role-option" :class="{ active: form.role === 'user' }">
               <input type="radio" v-model="form.role" value="user" />
               <span class="role-icon">🎟️</span>
-              <span class="role-name">Participant</span>
-              <span class="role-desc">Browse &amp; join events</span>
+              <span class="role-name">{{ t('register.participant') }}</span>
+              <span class="role-desc">{{ t('register.participantDesc') }}</span>
             </label>
-            <label
-              class="role-option"
-              :class="{ active: form.role === 'organizer' }"
-            >
+            <label class="role-option" :class="{ active: form.role === 'organizer' }">
               <input type="radio" v-model="form.role" value="organizer" />
               <span class="role-icon">📋</span>
-              <span class="role-name">Organizer</span>
-              <span class="role-desc">Create &amp; manage events</span>
+              <span class="role-name">{{ t('register.organizer') }}</span>
+              <span class="role-desc">{{ t('register.organizerDesc') }}</span>
             </label>
           </div>
         </div>
 
         <!-- Password -->
         <div class="field">
-          <label>Password</label>
+          <label>{{ t('register.password') }}</label>
           <div class="input-wrap">
             <input
               v-model="form.password"
@@ -95,7 +96,7 @@
 
         <!-- Confirm Password -->
         <div class="field">
-          <label>Confirm Password</label>
+          <label>{{ t('register.confirmPassword') }}</label>
           <input
             v-model="form.password_confirmation"
             :type="showPassword ? 'text' : 'password'"
@@ -107,14 +108,14 @@
 
         <!-- Submit -->
         <button type="submit" class="btn-submit" :disabled="form.processing">
-          <span v-if="form.processing">Creating account…</span>
-          <span v-else>Create Account →</span>
+          <span v-if="form.processing">{{ t('register.creating') }}</span>
+          <span v-else>{{ t('register.submit') }}</span>
         </button>
       </form>
 
       <p class="auth-switch">
-        Already have an account?
-        <a href="/login">Sign in</a>
+        {{ t('register.haveAccount') }}
+        <a href="/login">{{ t('register.signIn') }}</a>
       </p>
     </div>
 
@@ -128,8 +129,10 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useForm } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 
-const showPassword = ref(false);
+const { t, locale } = useI18n();
+const showPassword  = ref(false);
 
 const form = useForm({
   name:                  '',
@@ -138,6 +141,11 @@ const form = useForm({
   password_confirmation: '',
   role:                  'user',
 });
+
+function switchLang(lang) {
+  locale.value = lang;
+  localStorage.setItem('locale', lang);
+}
 
 const strength = computed(() => {
   const pw = form.password;
@@ -148,10 +156,10 @@ const strength = computed(() => {
   if (/[A-Z]/.test(pw)) score++;
   if (/[0-9]/.test(pw)) score++;
   if (/[^a-zA-Z0-9]/.test(pw)) score++;
-  if (score <= 1) return { pct: 25,  label: 'Weak',   cls: 'weak' };
-  if (score <= 2) return { pct: 50,  label: 'Fair',   cls: 'fair' };
-  if (score <= 3) return { pct: 75,  label: 'Good',   cls: 'good' };
-  return              { pct: 100, label: 'Strong', cls: 'strong' };
+  if (score <= 1) return { pct: 25,  label: t('register.weak'),   cls: 'weak' };
+  if (score <= 2) return { pct: 50,  label: t('register.fair'),   cls: 'fair' };
+  if (score <= 3) return { pct: 75,  label: t('register.good'),   cls: 'good' };
+  return              { pct: 100, label: t('register.strong'), cls: 'strong' };
 });
 
 function submit() {
@@ -163,4 +171,6 @@ function submit() {
 
 <style>
 @import './Register.css';
+
+
 </style>

@@ -5,25 +5,17 @@
     <aside class="sidebar">
       <div class="sidebar-logo">⚡ EventHub</div>
       <nav class="sidebar-nav">
-
-        <a  class="nav-item"
-          :class="{ active: activeTab === 'overview' }"
-          @click="activeTab = 'overview'"
-        >
-          <span class="nav-icon">📊</span> Overview
+        <a class="nav-item" :class="{ active: activeTab === 'overview' }" @click="activeTab = 'overview'">
+          <span class="nav-icon">📊</span> {{ t('org.overview') }}
         </a>
-
-         <a class="nav-item"
-          :class="{ active: activeTab === 'events' }"
-          @click="activeTab = 'events'"
-        >
-          <span class="nav-icon">📅</span> My Events
+        <a class="nav-item" :class="{ active: activeTab === 'events' }" @click="activeTab = 'events'">
+          <span class="nav-icon">📅</span> {{ t('org.myEvents') }}
         </a>
         <a class="nav-item" href="/">
-          <span class="nav-icon">🌐</span> Public Page
+          <span class="nav-icon">🌐</span> {{ t('org.publicPage') }}
         </a>
         <a class="nav-item" href="/dashboard">
-          <span class="nav-icon">👤</span> My Dashboard
+          <span class="nav-icon">👤</span> {{ t('org.myDashboard') }}
         </a>
       </nav>
       <div class="sidebar-footer">
@@ -31,10 +23,16 @@
           <div class="org-avatar">{{ userInitials }}</div>
           <div>
             <p class="org-name">{{ user.name }}</p>
-            <p class="org-role">Organizer</p>
+            <p class="org-role">{{ t('org.organizer') }}</p>
           </div>
         </div>
-        <button @click="logout" class="btn-logout">Logout</button>
+        <!-- Language Switcher -->
+        <div class="lang-switcher">
+          <button class="lang-btn" :class="{ active: locale === 'en' }" @click="switchLang('en')">EN</button>
+          <span class="lang-sep">|</span>
+          <button class="lang-btn" :class="{ active: locale === 'fr' }" @click="switchLang('fr')">FR</button>
+        </div>
+        <button @click="logout" class="btn-logout">{{ t('org.logout') }}</button>
       </div>
     </aside>
 
@@ -45,72 +43,67 @@
       <header class="topbar">
         <div>
           <h1 class="page-title">
-            {{ activeTab === 'overview' ? 'Organizer Overview' : 'My Events' }}
+            {{ activeTab === 'overview' ? t('org.overviewTitle') : t('org.myEventsTitle') }}
           </h1>
           <p class="page-sub">{{ today }}</p>
         </div>
-        <a href="/organizer/events/create" class="btn-create">+ Create Event</a>
+        <a href="/organizer/events/create" class="btn-create">+ {{ t('org.createEvent') }}</a>
       </header>
 
       <!-- SUCCESS TOAST -->
       <transition name="fade">
-        <div v-if="showSuccess" class="toast-success">
-          ✅ {{ success }}
-        </div>
+        <div v-if="showSuccess" class="toast-success">✅ {{ success }}</div>
       </transition>
 
       <!-- ══ OVERVIEW TAB ══ -->
       <div v-if="activeTab === 'overview'" class="tab-content">
-
-        <!-- Stats -->
         <div class="stats-grid">
           <div class="stat-card">
             <div class="stat-icon blue">📅</div>
             <div class="stat-info">
               <span class="stat-num">{{ events.length }}</span>
-              <span class="stat-label">Total Events</span>
+              <span class="stat-label">{{ t('org.totalEvents') }}</span>
             </div>
           </div>
           <div class="stat-card">
             <div class="stat-icon green">✅</div>
             <div class="stat-info">
               <span class="stat-num">{{ openEvents }}</span>
-              <span class="stat-label">Open Events</span>
+              <span class="stat-label">{{ t('org.openEvents') }}</span>
             </div>
           </div>
           <div class="stat-card">
             <div class="stat-icon purple">👥</div>
             <div class="stat-info">
               <span class="stat-num">{{ totalRegistrations }}</span>
-              <span class="stat-label">Total Registrations</span>
+              <span class="stat-label">{{ t('org.totalRegistrations') }}</span>
             </div>
           </div>
           <div class="stat-card">
             <div class="stat-icon amber">💺</div>
             <div class="stat-info">
               <span class="stat-num">{{ totalSpotsLeft }}</span>
-              <span class="stat-label">Spots Remaining</span>
+              <span class="stat-label">{{ t('org.spotsRemaining') }}</span>
             </div>
           </div>
         </div>
 
-        <!-- Recent Events Table -->
         <div class="table-card">
           <div class="table-header">
-            <h3>Recent Events</h3>
-            <button class="btn-view-all" @click="activeTab = 'events'">View All →</button>
+            <h3>{{ t('org.recentEvents') }}</h3>
+            <button class="btn-view-all" @click="activeTab = 'events'">{{ t('org.viewAll') }} →</button>
           </div>
           <div v-if="events.length === 0" class="empty-table">
-            <p>No events yet. <a href="/organizer/events/create">Create your first event →</a></p>
+            <p>{{ t('org.noEventsYet') }} <a href="/organizer/events/create">{{ t('org.createFirst') }} →</a></p>
           </div>
           <table v-else class="data-table">
             <thead>
               <tr>
-                <th>Event</th>
-                <th>Date</th>
-                <th>Status</th>
-                <th>Registrations</th>
-                <th>Actions</th>
+                <th>{{ t('org.event') }}</th>
+                <th>{{ t('org.date') }}</th>
+                <th>{{ t('org.status') }}</th>
+                <th>{{ t('org.registrations') }}</th>
+                <th>{{ t('org.actions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -120,124 +113,81 @@
                   <p class="cell-sub">📍 {{ event.location }}</p>
                 </td>
                 <td class="cell-muted">{{ event.date }}</td>
-                <td>
-                  <span class="status-badge" :class="event.status">{{ event.status }}</span>
-                </td>
+                <td><span class="status-badge" :class="event.status">{{ event.status }}</span></td>
                 <td>
                   <div class="reg-cell">
                     <span class="reg-count">{{ event.registrations_count }} / {{ event.capacity }}</span>
                     <div class="mini-bar">
-                      <div
-                        class="mini-fill"
-                        :style="{ width: getCapacityPct(event) + '%' }"
-                        :class="getCapacityFillClass(event)"
-                      ></div>
+                      <div class="mini-fill" :style="{ width: getCapacityPct(event) + '%' }" :class="getCapacityFillClass(event)"></div>
                     </div>
                   </div>
                 </td>
                 <td>
                   <div class="action-btns">
-                    <a :href="`/organizer/events/${event.id}/edit`" class="btn-action edit">Edit</a>
-                    <a :href="`/organizer/events/${event.id}/participants`" class="btn-action view">Participants</a>
+                    <a :href="`/organizer/events/${event.id}/edit`" class="btn-action edit">{{ t('org.edit') }}</a>
+                    <a :href="`/organizer/events/${event.id}/participants`" class="btn-action view">{{ t('org.participants') }}</a>
                   </div>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
-
       </div>
 
       <!-- ══ MY EVENTS TAB ══ -->
       <div v-if="activeTab === 'events'" class="tab-content">
-
-        <!-- Search & Filter -->
         <div class="filter-bar">
           <div class="search-wrap">
             <span class="search-icon">🔍</span>
-            <input
-              v-model="search"
-              type="text"
-              placeholder="Search your events..."
-              class="search-input"
-            />
+            <input v-model="search" type="text" :placeholder="t('org.searchEvents')" class="search-input" />
           </div>
           <select v-model="filterStatus" class="sort-select">
-            <option value="all">All Status</option>
-            <option value="open">Open</option>
-            <option value="closed">Closed</option>
-            <option value="finished">Finished</option>
+            <option value="all">{{ t('org.allStatus') }}</option>
+            <option value="open">{{ t('org.open') }}</option>
+            <option value="closed">{{ t('org.closed') }}</option>
+            <option value="finished">{{ t('org.finished') }}</option>
           </select>
         </div>
 
-        <!-- Empty -->
         <div v-if="filteredEvents.length === 0" class="empty-state">
           <div class="empty-icon">📅</div>
-          <h3>No events found</h3>
-          <p>{{ search ? 'Try a different search term.' : 'You have no events yet.' }}</p>
-          <a href="/organizer/events/create" class="btn-primary">+ Create Your First Event</a>
+          <h3>{{ t('org.noEventsFound') }}</h3>
+          <p>{{ search ? t('org.tryDifferent') : t('org.noEventsYet') }}</p>
+          <a href="/organizer/events/create" class="btn-primary">+ {{ t('org.createFirst') }}</a>
         </div>
 
-        <!-- Events Cards -->
         <div v-else class="events-grid">
           <div v-for="event in filteredEvents" :key="event.id" class="event-card">
-
-            <!-- Card Header -->
             <div class="card-header">
               <span class="status-badge" :class="event.status">{{ event.status }}</span>
               <div class="card-actions-top">
-
-                 <a :href="`/organizer/events/${event.id}/edit`"
-                  class="icon-btn edit"
-                  title="Edit"
-                >✏️</a>
-                <button
-                  class="icon-btn delete"
-                  title="Delete"
-                  @click="confirmDelete(event)"
-                >🗑️</button>
+                <a :href="`/organizer/events/${event.id}/edit`" class="icon-btn edit" title="Edit">✏️</a>
+                <button class="icon-btn delete" :title="t('org.delete')" @click="confirmDelete(event)">🗑️</button>
               </div>
             </div>
-
             <h3 class="card-title">{{ event.title }}</h3>
             <p class="card-desc">{{ truncate(event.description, 90) }}</p>
-
             <div class="card-meta">
               <span>📅 {{ event.date }}</span>
               <span>📍 {{ event.location }}</span>
             </div>
-
-            <!-- Capacity Bar -->
             <div class="capacity-section">
               <div class="capacity-info">
-                <span>{{ event.registrations_count }} registered</span>
-                <span>{{ event.spots_left }} spots left</span>
+                <span>{{ event.registrations_count }} {{ t('org.registered') }}</span>
+                <span>{{ event.spots_left }} {{ t('org.spotsLeft') }}</span>
               </div>
               <div class="capacity-bar">
-                <div
-                  class="capacity-fill"
-                  :style="{ width: getCapacityPct(event) + '%' }"
-                  :class="getCapacityFillClass(event)"
-                ></div>
+                <div class="capacity-fill" :style="{ width: getCapacityPct(event) + '%' }" :class="getCapacityFillClass(event)"></div>
               </div>
             </div>
-
-            <!-- Card Footer -->
             <div class="card-footer">
-
-                <a :href="`/organizer/events/${event.id}/participants`"
-                class="btn-participants"
-              >
-                👥 View Participants
+              <a :href="`/organizer/events/${event.id}/participants`" class="btn-participants">
+                👥 {{ t('org.viewParticipants') }}
               </a>
-
-                <a :href="`/organizer/events/${event.id}/edit`"
-                class="btn-edit"
-              >
-                Edit →
+              <a :href="`/organizer/events/${event.id}/edit`" class="btn-edit">
+                {{ t('org.edit') }} →
               </a>
             </div>
-
           </div>
         </div>
       </div>
@@ -248,15 +198,15 @@
     <transition name="fade">
       <div v-if="eventToDelete" class="modal-overlay" @click.self="eventToDelete = null">
         <div class="modal">
-          <h3 class="modal-title">Delete Event</h3>
+          <h3 class="modal-title">{{ t('org.deleteEvent') }}</h3>
           <p class="modal-body">
-            Are you sure you want to delete
+            {{ t('org.deleteConfirm') }}
             <strong>"{{ eventToDelete.title }}"</strong>?
-            This will also delete all registrations. This cannot be undone.
+            {{ t('org.deleteWarning') }}
           </p>
           <div class="modal-footer">
-            <button class="btn-modal-cancel" @click="eventToDelete = null">Cancel</button>
-            <button class="btn-modal-delete" @click="deleteEvent">Yes, Delete</button>
+            <button class="btn-modal-cancel" @click="eventToDelete = null">{{ t('org.cancel') }}</button>
+            <button class="btn-modal-delete" @click="deleteEvent">{{ t('org.yesDelete') }}</button>
           </div>
         </div>
       </div>
@@ -268,6 +218,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { usePage, router } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
+
+const { t, locale } = useI18n();
 
 const props = defineProps({
   events:  { type: Array,  default: () => [] },
@@ -282,9 +235,14 @@ const filterStatus  = ref('all');
 const eventToDelete = ref(null);
 const showSuccess   = ref(false);
 
-const today = new Date().toLocaleDateString('en-US', {
+const today = new Date().toLocaleDateString(locale.value === 'fr' ? 'fr-FR' : 'en-US', {
   weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
 });
+
+function switchLang(lang) {
+  locale.value = lang;
+  localStorage.setItem('locale', lang);
+}
 
 const userInitials = computed(() =>
   user.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) ?? '??'
@@ -322,17 +280,13 @@ function getCapacityFillClass(event) {
   if (pct >= 60) return 'fill-amber';
   return 'fill-green';
 }
-function confirmDelete(event) {
-  eventToDelete.value = event;
-}
+function confirmDelete(event) { eventToDelete.value = event; }
 function deleteEvent() {
   router.delete(`/organizer/events/${eventToDelete.value.id}`, {
     onFinish: () => eventToDelete.value = null,
   });
 }
-function logout() {
-  router.post('/logout');
-}
+function logout() { router.post('/logout'); }
 </script>
 
 <style scoped>

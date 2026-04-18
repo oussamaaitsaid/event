@@ -8,11 +8,16 @@
         <div class="nav-right">
           <span class="role-chip" :class="user.role">{{ user.role }}</span>
           <span class="user-name">{{ user.name }}</span>
-          <!-- Organizer only button -->
           <a v-if="user.role === 'organizer'" href="/organizer/events/create" class="btn-create">
-            + Create Event
+            + {{ t('user.createEvent') }}
           </a>
-          <button @click="logout" class="btn-logout">Logout</button>
+          <!-- Language Switcher -->
+          <div class="lang-switcher">
+            <button class="lang-btn" :class="{ active: locale === 'en' }" @click="switchLang('en')">EN</button>
+            <span class="lang-sep">|</span>
+            <button class="lang-btn" :class="{ active: locale === 'fr' }" @click="switchLang('fr')">FR</button>
+          </div>
+          <button @click="logout" class="btn-logout">{{ t('user.logout') }}</button>
         </div>
       </div>
     </nav>
@@ -22,13 +27,13 @@
       <div class="welcome-inner">
         <div class="welcome-avatar">{{ userInitials }}</div>
         <div>
-          <h1 class="welcome-title">Welcome back, {{ user.name }}! 👋</h1>
+          <h1 class="welcome-title">{{ t('user.welcomeBack') }}, {{ user.name }}! 👋</h1>
           <p class="welcome-sub">
             <span v-if="user.role === 'organizer'">
-              You are logged in as an <strong>Organizer</strong> — you can browse events and create your own.
+              {{ t('user.organizerDesc') }}
             </span>
             <span v-else>
-              You are logged in as a <strong>Participant</strong> — browse and register for events below.
+              {{ t('user.participantDesc') }}
             </span>
           </p>
         </div>
@@ -43,7 +48,7 @@
           :class="{ active: activeTab === 'browse' }"
           @click="activeTab = 'browse'"
         >
-          🔍 Browse Events
+          🔍 {{ t('user.browseEvents') }}
           <span class="tab-count">{{ events.length }}</span>
         </button>
         <button
@@ -51,7 +56,7 @@
           :class="{ active: activeTab === 'mine' }"
           @click="activeTab = 'mine'"
         >
-          📋 My Registrations
+          📋 {{ t('user.myRegistrations') }}
           <span class="tab-count">{{ myRegistrations.length }}</span>
         </button>
       </div>
@@ -70,23 +75,23 @@
             <input
               v-model="search"
               type="text"
-              placeholder="Search events by title or location..."
+              :placeholder="t('user.searchPlaceholder')"
               class="search-input"
             />
           </div>
           <select v-model="sortBy" class="sort-select">
-            <option value="date">Sort by Date</option>
-            <option value="spots">Most Spots</option>
-            <option value="title">A → Z</option>
+            <option value="date">{{ t('user.sortByDate') }}</option>
+            <option value="spots">{{ t('user.mostSpots') }}</option>
+            <option value="title">{{ t('user.aToZ') }}</option>
           </select>
         </div>
 
         <!-- Empty -->
         <div v-if="filteredEvents.length === 0" class="empty-state">
           <div class="empty-icon">🗓</div>
-          <h3>No events found</h3>
-          <p>{{ search ? 'Try a different search term.' : 'No open events at the moment.' }}</p>
-          <button v-if="search" @click="search = ''" class="btn-outline">Clear Search</button>
+          <h3>{{ t('user.noEventsFound') }}</h3>
+          <p>{{ search ? t('user.tryDifferent') : t('user.noOpenEvents') }}</p>
+          <button v-if="search" @click="search = ''" class="btn-outline">{{ t('user.clearSearch') }}</button>
         </div>
 
         <!-- Events Grid -->
@@ -95,7 +100,7 @@
 
             <div class="card-top">
               <span class="card-badge" :class="getBadgeClass(event.spots_left)">
-                {{ event.spots_left > 0 ? event.spots_left + ' spots left' : 'Full' }}
+                {{ event.spots_left > 0 ? event.spots_left + ' ' + t('user.spotsLeft') : t('user.full') }}
               </span>
               <span class="card-date">{{ event.date }}</span>
             </div>
@@ -106,7 +111,7 @@
             <div class="card-meta">
               <span>📍 {{ event.location }}</span>
               <span>👤 {{ event.organizer }}</span>
-              <span>👥 {{ event.capacity }} capacity</span>
+              <span>👥 {{ event.capacity }} {{ t('user.capacity') }}</span>
             </div>
 
             <!-- Capacity Bar -->
@@ -121,16 +126,16 @@
             <!-- Action -->
             <div class="card-action">
               <span v-if="event.is_registered" class="registered-tag">
-                ✅ Registered
+                ✅ {{ t('user.registered') }}
               </span>
               <button
                 v-else-if="event.spots_left > 0"
                 class="btn-register"
                 @click="registerEvent(event)"
               >
-                Register Now →
+                {{ t('user.registerNow') }}
               </button>
-              <span v-else class="full-tag">Event Full</span>
+              <span v-else class="full-tag">{{ t('user.eventFull') }}</span>
             </div>
 
           </div>
@@ -143,9 +148,9 @@
         <!-- Empty -->
         <div v-if="myRegistrations.length === 0" class="empty-state">
           <div class="empty-icon">📋</div>
-          <h3>No registrations yet</h3>
-          <p>Browse events and register to see them here.</p>
-          <button class="btn-primary" @click="activeTab = 'browse'">Browse Events →</button>
+          <h3>{{ t('user.noRegistrationsYet') }}</h3>
+          <p>{{ t('user.noRegistrationsDesc') }}</p>
+          <button class="btn-primary" @click="activeTab = 'browse'">{{ t('user.browseEvents') }} →</button>
         </div>
 
         <!-- Registrations List -->
@@ -178,7 +183,7 @@
                 class="btn-cancel"
                 @click="cancelRegistration(reg)"
               >
-                Cancel
+                {{ t('user.cancel') }}
               </button>
             </div>
           </div>
@@ -189,7 +194,7 @@
 
     <!-- FOOTER -->
     <footer class="footer">
-      <p>© 2026 EventHub · Built with Laravel &amp; Vue.js</p>
+      <p>© 2026 EventHub · {{ t('user.builtWith') }}</p>
     </footer>
 
   </div>
@@ -198,6 +203,9 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { usePage, router } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
+
+const { t, locale } = useI18n();
 
 const props = defineProps({
   events:          { type: Array, default: () => [] },
@@ -209,6 +217,11 @@ const user      = page.props.auth.user;
 const activeTab = ref('browse');
 const search    = ref('');
 const sortBy    = ref('date');
+
+function switchLang(lang) {
+  locale.value = lang;
+  localStorage.setItem('locale', lang);
+}
 
 const userInitials = computed(() =>
   user.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) ?? '??'
@@ -247,7 +260,7 @@ function registerEvent(event) {
   router.post(`/events/${event.id}/register`);
 }
 function cancelRegistration(reg) {
-  if (confirm('Cancel your registration for this event?')) {
+  if (confirm(t('user.cancelConfirm'))) {
     router.patch(`/registrations/${reg.id}/cancel`);
   }
 }
@@ -258,4 +271,6 @@ function logout() {
 
 <style scoped>
 @import './css/Dashboard.css';
+
+
 </style>

@@ -7,8 +7,15 @@
         <a href="/" class="logo">⚡ EventHub</a>
       </div>
 
-      <h1 class="auth-title">Welcome back</h1>
-      <p class="auth-sub">Sign in to your account to continue</p>
+      <!-- Language Switcher -->
+      <div class="lang-switcher">
+        <button class="lang-btn" :class="{ active: locale === 'en' }" @click="switchLang('en')">EN</button>
+        <span class="lang-sep">|</span>
+        <button class="lang-btn" :class="{ active: locale === 'fr' }" @click="switchLang('fr')">FR</button>
+      </div>
+
+      <h1 class="auth-title">{{ t('login.title') }}</h1>
+      <p class="auth-sub">{{ t('login.sub') }}</p>
 
       <!-- Error -->
       <div v-if="form.errors.email" class="alert-error">
@@ -18,11 +25,11 @@
       <form @submit.prevent="submit" class="auth-form">
         <!-- Email -->
         <div class="field">
-          <label>Email address</label>
+          <label>{{ t('login.email') }}</label>
           <input
             v-model="form.email"
             type="email"
-            placeholder="you@example.com"
+            :placeholder="t('login.emailPlaceholder')"
             autocomplete="email"
             :class="{ 'input-error': form.errors.email }"
           />
@@ -31,7 +38,7 @@
         <!-- Password -->
         <div class="field">
           <div class="field-row">
-            <label>Password</label>
+            <label>{{ t('login.password') }}</label>
           </div>
           <div class="input-wrap">
             <input
@@ -51,20 +58,20 @@
         <div class="field-check">
           <label class="check-label">
             <input type="checkbox" v-model="form.remember" />
-            <span>Remember me</span>
+            <span>{{ t('login.remember') }}</span>
           </label>
         </div>
 
         <!-- Submit -->
         <button type="submit" class="btn-submit" :disabled="form.processing">
-          <span v-if="form.processing">Signing in…</span>
-          <span v-else>Sign In →</span>
+          <span v-if="form.processing">{{ t('login.signingIn') }}</span>
+          <span v-else>{{ t('login.submit') }}</span>
         </button>
       </form>
 
       <p class="auth-switch">
-        Don't have an account?
-        <a href="/register">Create one</a>
+        {{ t('login.noAccount') }}
+        <a href="/register">{{ t('login.createOne') }}</a>
       </p>
     </div>
 
@@ -79,7 +86,9 @@
 <script setup>
 import { ref } from 'vue';
 import { useForm } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 
+const { t, locale } = useI18n();
 const showPassword = ref(false);
 
 const form = useForm({
@@ -87,6 +96,11 @@ const form = useForm({
   password: '',
   remember: false,
 });
+
+function switchLang(lang) {
+  locale.value = lang;
+  localStorage.setItem('locale', lang);
+}
 
 function submit() {
   form.post('/login', {
