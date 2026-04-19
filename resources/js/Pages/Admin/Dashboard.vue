@@ -5,18 +5,17 @@
     <aside class="sidebar">
       <div class="sidebar-logo">⚡ EventHub</div>
       <nav class="sidebar-nav">
-      <!-- ✅ After -->
         <a class="nav-item" @click="activeTab = 'overview'" :class="{ active: activeTab === 'overview' }">
-        <span class="nav-icon">📊</span> Dashboard
+          <span class="nav-icon">📊</span> {{ t('admin.dashboard') }}
         </a>
         <a class="nav-item" @click="activeTab = 'users'" :class="{ active: activeTab === 'users' }">
-        <span class="nav-icon">👥</span> Users
+          <span class="nav-icon">👥</span> {{ t('admin.users') }}
         </a>
         <a class="nav-item" @click="activeTab = 'events'" :class="{ active: activeTab === 'events' }">
-        <span class="nav-icon">📅</span> Events
+          <span class="nav-icon">📅</span> {{ t('admin.events') }}
         </a>
-        <a class="nav-item" href="/" >
-          <span class="nav-icon">🌐</span> Public Page
+        <a class="nav-item" href="/">
+          <span class="nav-icon">🌐</span> {{ t('admin.publicPage') }}
         </a>
       </nav>
       <div class="sidebar-footer">
@@ -24,10 +23,16 @@
           <div class="admin-avatar">{{ userInitials }}</div>
           <div>
             <p class="admin-name">{{ user.name }}</p>
-            <p class="admin-role">Administrator</p>
+            <p class="admin-role">{{ t('admin.administrator') }}</p>
           </div>
         </div>
-        <button @click="logout" class="btn-logout">Logout</button>
+        <!-- Language Switcher -->
+        <div class="lang-switcher">
+          <button class="lang-btn" :class="{ active: locale === 'en' }" @click="switchLang('en')">EN</button>
+          <span class="lang-sep">|</span>
+          <button class="lang-btn" :class="{ active: locale === 'fr' }" @click="switchLang('fr')">FR</button>
+        </div>
+        <button @click="logout" class="btn-logout">{{ t('admin.logout') }}</button>
       </div>
     </aside>
 
@@ -38,13 +43,13 @@
       <header class="topbar">
         <div>
           <h1 class="page-title">
-            {{ activeTab === 'overview' ? 'Dashboard Overview' :
-               activeTab === 'users'    ? 'User Management' : 'Event Management' }}
+            {{ activeTab === 'overview' ? t('admin.dashboardOverview') :
+               activeTab === 'users'    ? t('admin.userManagement') : t('admin.eventManagement') }}
           </h1>
-          <p class="page-sub">{{ new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) }}</p>
+          <p class="page-sub">{{ today }}</p>
         </div>
         <div class="topbar-right">
-          <span class="admin-badge">Admin</span>
+          <span class="admin-badge">{{ t('admin.adminBadge') }}</span>
         </div>
       </header>
 
@@ -57,33 +62,33 @@
             <div class="stat-icon blue">👥</div>
             <div class="stat-info">
               <span class="stat-num">{{ stats.totalUsers }}</span>
-              <span class="stat-label">Total Users</span>
+              <span class="stat-label">{{ t('admin.totalUsers') }}</span>
             </div>
-            <div class="stat-trend">+{{ stats.totalOrganizers }} organizers</div>
+            <div class="stat-trend">+{{ stats.totalOrganizers }} {{ t('admin.organizers') }}</div>
           </div>
           <div class="stat-card">
             <div class="stat-icon purple">📅</div>
             <div class="stat-info">
               <span class="stat-num">{{ stats.totalEvents }}</span>
-              <span class="stat-label">Total Events</span>
+              <span class="stat-label">{{ t('admin.totalEvents') }}</span>
             </div>
-            <div class="stat-trend">{{ stats.openEvents }} open</div>
+            <div class="stat-trend">{{ stats.openEvents }} {{ t('admin.open') }}</div>
           </div>
           <div class="stat-card">
             <div class="stat-icon green">📝</div>
             <div class="stat-info">
               <span class="stat-num">{{ stats.totalRegistrations }}</span>
-              <span class="stat-label">Registrations</span>
+              <span class="stat-label">{{ t('admin.registrations') }}</span>
             </div>
-            <div class="stat-trend">{{ stats.registeredCount }} active</div>
+            <div class="stat-trend">{{ stats.registeredCount }} {{ t('admin.active') }}</div>
           </div>
           <div class="stat-card">
             <div class="stat-icon red">🚫</div>
             <div class="stat-info">
               <span class="stat-num">{{ stats.blockedUsers }}</span>
-              <span class="stat-label">Blocked Users</span>
+              <span class="stat-label">{{ t('admin.blockedUsers') }}</span>
             </div>
-            <div class="stat-trend">{{ stats.cancelledCount }} cancellations</div>
+            <div class="stat-trend">{{ stats.cancelledCount }} {{ t('admin.cancellations') }}</div>
           </div>
         </div>
 
@@ -93,16 +98,16 @@
           <!-- Recent Users -->
           <div class="table-card">
             <div class="table-header">
-              <h3>Recent Users</h3>
-              <button class="btn-view-all" @click="activeTab = 'users'">View All →</button>
+              <h3>{{ t('admin.recentUsers') }}</h3>
+              <button class="btn-view-all" @click="activeTab = 'users'">{{ t('admin.viewAll') }} →</button>
             </div>
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Role</th>
-                  <th>Status</th>
-                  <th>Joined</th>
+                  <th>{{ t('admin.name') }}</th>
+                  <th>{{ t('admin.role') }}</th>
+                  <th>{{ t('admin.status') }}</th>
+                  <th>{{ t('admin.joined') }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -127,15 +132,15 @@
           <!-- Recent Events -->
           <div class="table-card">
             <div class="table-header">
-              <h3>Recent Events</h3>
-              <button class="btn-view-all" @click="activeTab = 'events'">View All →</button>
+              <h3>{{ t('admin.recentEvents') }}</h3>
+              <button class="btn-view-all" @click="activeTab = 'events'">{{ t('admin.viewAll') }} →</button>
             </div>
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>Event</th>
-                  <th>Status</th>
-                  <th>Registrations</th>
+                  <th>{{ t('admin.event') }}</th>
+                  <th>{{ t('admin.status') }}</th>
+                  <th>{{ t('admin.registrations') }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -158,18 +163,18 @@
       <div v-if="activeTab === 'users'" class="tab-content">
         <div class="table-card full">
           <div class="table-header">
-            <h3>All Users</h3>
-            <input v-model="userSearch" placeholder="🔍 Search users..." class="search-input" />
+            <h3>{{ t('admin.allUsers') }}</h3>
+            <input v-model="userSearch" :placeholder="t('admin.searchUsers')" class="search-input" />
           </div>
           <table class="data-table">
             <thead>
               <tr>
                 <th>#</th>
-                <th>User</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Joined</th>
-                <th>Actions</th>
+                <th>{{ t('admin.user') }}</th>
+                <th>{{ t('admin.role') }}</th>
+                <th>{{ t('admin.status') }}</th>
+                <th>{{ t('admin.joined') }}</th>
+                <th>{{ t('admin.actions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -194,10 +199,10 @@
                       :class="u.status === 'active' ? 'danger' : 'success'"
                       @click="toggleStatus(u)"
                     >
-                      {{ u.status === 'active' ? 'Block' : 'Unblock' }}
+                      {{ u.status === 'active' ? t('admin.block') : t('admin.unblock') }}
                     </button>
                     <button class="btn-action info" @click="changeRole(u)">
-                      → {{ u.role === 'user' ? 'Organizer' : 'User' }}
+                      → {{ u.role === 'user' ? t('admin.makeOrganizer') : t('admin.makeUser') }}
                     </button>
                   </div>
                   <span v-else class="cell-muted">—</span>
@@ -212,19 +217,19 @@
       <div v-if="activeTab === 'events'" class="tab-content">
         <div class="table-card full">
           <div class="table-header">
-            <h3>All Events</h3>
-            <input v-model="eventSearch" placeholder="🔍 Search events..." class="search-input" />
+            <h3>{{ t('admin.allEvents') }}</h3>
+            <input v-model="eventSearch" :placeholder="t('admin.searchEvents')" class="search-input" />
           </div>
           <table class="data-table">
             <thead>
               <tr>
                 <th>#</th>
-                <th>Event</th>
-                <th>Organizer</th>
-                <th>Date</th>
-                <th>Status</th>
-                <th>Registrations</th>
-                <th>Actions</th>
+                <th>{{ t('admin.event') }}</th>
+                <th>{{ t('admin.organizer') }}</th>
+                <th>{{ t('admin.date') }}</th>
+                <th>{{ t('admin.status') }}</th>
+                <th>{{ t('admin.registrations') }}</th>
+                <th>{{ t('admin.actions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -239,7 +244,7 @@
                 <td><span class="event-badge" :class="e.status">{{ e.status }}</span></td>
                 <td class="cell-center">{{ e.registrations_count }} / {{ e.capacity }}</td>
                 <td>
-                  <button class="btn-action danger" @click="deleteEvent(e)">Delete</button>
+                  <button class="btn-action danger" @click="deleteEvent(e)">{{ t('admin.delete') }}</button>
                 </td>
               </tr>
             </tbody>
@@ -254,6 +259,9 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { usePage, router } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
+
+const { t, locale } = useI18n();
 
 const props = defineProps({
   stats:       { type: Object, default: () => ({}) },
@@ -266,6 +274,15 @@ const user        = page.props.auth.user;
 const activeTab   = ref('overview');
 const userSearch  = ref('');
 const eventSearch = ref('');
+
+const today = new Date().toLocaleDateString(locale.value === 'fr' ? 'fr-FR' : 'en-US', {
+  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+});
+
+function switchLang(lang) {
+  locale.value = lang;
+  localStorage.setItem('locale', lang);
+}
 
 const userInitials = computed(() => initials(user.name));
 
@@ -287,22 +304,17 @@ const filteredEvents = computed(() =>
   )
 );
 
-function toggleStatus(u) {
-  router.patch(`/admin/users/${u.id}/toggle`);
-}
-function changeRole(u) {
-  router.patch(`/admin/users/${u.id}/role`);
-}
+function toggleStatus(u) { router.patch(`/admin/users/${u.id}/toggle`); }
+function changeRole(u)    { router.patch(`/admin/users/${u.id}/role`); }
 function deleteEvent(e) {
-  if (confirm(`Delete "${e.title}"? This cannot be undone.`)) {
+  if (confirm(t('admin.deleteConfirm', { title: e.title }))) {
     router.delete(`/admin/events/${e.id}`);
   }
 }
-function logout() {
-  router.post('/logout');
-}
+function logout() { router.post('/logout'); }
 </script>
 
 <style scoped>
 @import './css/Dashboard.css';
+
 </style>
