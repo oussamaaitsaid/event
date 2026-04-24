@@ -13,30 +13,36 @@ class UserController extends Controller
     {
         $user = Auth::user();
 
-       
+        // Auto close past events
+        Event::where('status', 'open')
+            ->where('date', '<', now())
+            ->update(['status' => 'finished']);
 
-        // Open events (not registered yet)
+        // Open events
         $events = Event::with('organizer:id,name')
             ->where('status', 'open')
             ->orderBy('date', 'asc')
             ->get()
             ->map(function ($event) use ($user) {
-                $isRegistered = $event->registrations()
+
+                // ✅ Check pending and registered
+                $myRegistration = $event->registrations()
                     ->where('user_id', $user->id)
-                    ->where('status', 'registered')
-                    ->exists();
+                    ->whereIn('status', ['pending', 'registered'])
+                    ->first();
 
                 return [
-                    'id'           => $event->id,
-                    'title'        => $event->title,
-                    'description'  => $event->description,
-                    'date'         => \Carbon\Carbon::parse($event->date)->format('M d, Y · H:i'),
-                    'location'     => $event->location,
-                    'capacity'     => $event->capacity,
-                    'status'       => $event->status,
-                    'organizer'    => $event->organizer->name ?? 'Unknown',
-                    'spots_left'   => $event->capacity - $event->registrations()->count(),
-                    'is_registered'=> $isRegistered,
+                    'id'            => $event->id,
+                    'title'         => $event->title,
+                    'description'   => $event->description,
+                    'date'          => \Carbon\Carbon::parse($event->date)->format('M d, Y · H:i'),
+                    'location'      => $event->location,
+                    'capacity'      => $event->capacity,
+                    'status'        => $event->status,
+                    'organizer'     => $event->organizer->name ?? 'Unknown',
+                    'spots_left'    => $event->capacity - $event->registrations()->where('status', 'registered')->count(),
+                    'is_registered' => $myRegistration !== null,
+                    'my_status'     => $myRegistration?->status ?? null, // ✅ pending, registered, or null
                 ];
             });
 
@@ -46,11 +52,11 @@ class UserController extends Controller
             ->latest()
             ->get()
             ->map(fn($r) => [
-                'id'         => $r->id,
-                'status'     => $r->status,
-                'event_id'   => $r->event_id,
-                'event_title'=> $r->event->title ?? 'Deleted Event',
-                'event_date' => $r->event ? \Carbon\Carbon::parse($r->event->date)->format('M d, Y · H:i') : '—',
+                'id'             => $r->id,
+                'status'         => $r->status, // pending, registered, cancelled
+                'event_id'       => $r->event_id,
+                'event_title'    => $r->event->title ?? 'Deleted Event',
+                'event_date'     => $r->event ? \Carbon\Carbon::parse($r->event->date)->format('M d, Y · H:i') : '—',
                 'event_location' => $r->event->location ?? '—',
                 'event_status'   => $r->event->status ?? '—',
             ]);

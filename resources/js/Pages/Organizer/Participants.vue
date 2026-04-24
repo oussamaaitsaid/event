@@ -34,10 +34,15 @@
     <!-- CONTENT -->
     <div class="content-wrapper">
 
+      <!-- ✅ Added totalPending to stats -->
       <div class="stats-row">
         <div class="mini-stat">
           <span class="mini-num">{{ totalRegistered }}</span>
           <span class="mini-label">{{ t('org.registered') }}</span>
+        </div>
+        <div class="mini-stat">
+          <span class="mini-num">{{ totalPending }}</span>
+          <span class="mini-label">{{ t('org.pending') }}</span>
         </div>
         <div class="mini-stat">
           <span class="mini-num">{{ totalCancelled }}</span>
@@ -71,8 +76,10 @@
               <span class="search-icon">🔍</span>
               <input v-model="search" type="text" :placeholder="t('org.searchParticipants')" class="search-input" />
             </div>
+            <!-- ✅ Added pending option -->
             <select v-model="filterStatus" class="sort-select">
               <option value="all">{{ t('org.all') }}</option>
+              <option value="pending">{{ t('org.pending') }}</option>
               <option value="registered">{{ t('org.registered') }}</option>
               <option value="cancelled">{{ t('org.cancelled') }}</option>
             </select>
@@ -85,6 +92,7 @@
           <p>{{ search ? t('org.tryDifferent') : t('org.noOneRegistered') }}</p>
         </div>
 
+        <!-- ✅ Added Actions column -->
         <table v-else class="data-table">
           <thead>
             <tr>
@@ -93,6 +101,7 @@
               <th>{{ t('org.emailLabel') }}</th>
               <th>{{ t('org.status') }}</th>
               <th>{{ t('org.registeredOn') }}</th>
+              <th>{{ t('org.actions') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -107,6 +116,14 @@
               <td class="cell-email">{{ p.email }}</td>
               <td><span class="reg-badge" :class="p.status">{{ p.status }}</span></td>
               <td class="cell-muted">{{ p.registered_at }}</td>
+              <!-- ✅ Approve / Reject buttons -->
+              <td>
+                <div class="action-btns" v-if="p.status === 'pending'">
+                  <button class="btn-approve" @click="approve(p)">✅ {{ t('org.approve') }}</button>
+                  <button class="btn-reject"  @click="reject(p)">❌ {{ t('org.reject') }}</button>
+                </div>
+                <span v-else class="cell-muted">—</span>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -144,7 +161,9 @@ function switchLang(lang) {
   localStorage.setItem('locale', lang);
 }
 
+// ✅ Added totalPending
 const totalRegistered = computed(() => props.participants.filter(p => p.status === 'registered').length);
+const totalPending    = computed(() => props.participants.filter(p => p.status === 'pending').length);
 const totalCancelled  = computed(() => props.participants.filter(p => p.status === 'cancelled').length);
 const spotsLeft       = computed(() => props.event.capacity - totalRegistered.value);
 const capacityPct     = computed(() => Math.min(100, Math.round((totalRegistered.value / props.event.capacity) * 100)));
@@ -167,11 +186,38 @@ function getCapacityFillClass() {
   if (pct >= 60) return 'fill-amber';
   return 'fill-green';
 }
+
+// ✅ Approve and Reject functions
+function approve(p) {
+  router.patch(`/registrations/${p.id}/approve`);
+}
+function reject(p) {
+  router.patch(`/registrations/${p.id}/reject`);
+}
+
 function logout() { router.post('/logout'); }
 </script>
 
 <style scoped>
 @import './css/Participants.css';
 
+/* ✅ Pending badge */
+.reg-badge.pending { background: #fef3c7; color: #b45309; }
 
+/* ✅ Approve / Reject buttons */
+.btn-approve {
+  padding: 0.3rem 0.75rem; background: #dcfce7; color: #15803d;
+  border: none; border-radius: 0.375rem; font-size: 0.78rem;
+  font-weight: 600; cursor: pointer; transition: all 0.2s;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+.btn-approve:hover { background: #22c55e; color: white; }
+
+.btn-reject {
+  padding: 0.3rem 0.75rem; background: #fee2e2; color: #b91c1c;
+  border: none; border-radius: 0.375rem; font-size: 0.78rem;
+  font-weight: 600; cursor: pointer; transition: all 0.2s;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+.btn-reject:hover { background: #ef4444; color: white; }
 </style>

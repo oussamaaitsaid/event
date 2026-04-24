@@ -60,10 +60,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [UserController::class, 'dashboard'])->name('dashboard');
 
     // Registrations
-    Route::post('/events/{event}/register', [RegistrationController::class, 'store'])->name('register.event');
-    Route::patch('/registrations/{registration}/cancel', [RegistrationController::class, 'cancel'])->name('register.cancel');
+    Route::post('/events/{event}/register',               [RegistrationController::class, 'store'])->name('register.event');
+    Route::patch('/registrations/{registration}/cancel',  [RegistrationController::class, 'cancel'])->name('register.cancel');
+    Route::patch('/registrations/{registration}/approve', [RegistrationController::class, 'approve'])->name('register.approve');
+    Route::patch('/registrations/{registration}/reject',  [RegistrationController::class, 'reject'])->name('register.reject');
 });
-
 
 
 

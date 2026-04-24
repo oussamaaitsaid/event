@@ -11,7 +11,6 @@
           <a v-if="user.role === 'organizer'" href="/organizer/events/create" class="btn-create">
             + {{ t('user.createEvent') }}
           </a>
-          <!-- Language Switcher -->
           <div class="lang-switcher">
             <button class="lang-btn" :class="{ active: locale === 'en' }" @click="switchLang('en')">EN</button>
             <span class="lang-sep">|</span>
@@ -29,12 +28,8 @@
         <div>
           <h1 class="welcome-title">{{ t('user.welcomeBack') }}, {{ user.name }}! 👋</h1>
           <p class="welcome-sub">
-            <span v-if="user.role === 'organizer'">
-              {{ t('user.organizerDesc') }}
-            </span>
-            <span v-else>
-              {{ t('user.participantDesc') }}
-            </span>
+            <span v-if="user.role === 'organizer'">{{ t('user.organizerDesc') }}</span>
+            <span v-else>{{ t('user.participantDesc') }}</span>
           </p>
         </div>
       </div>
@@ -43,19 +38,11 @@
     <!-- TABS -->
     <div class="tabs-bar">
       <div class="tabs-inner">
-        <button
-          class="tab-btn"
-          :class="{ active: activeTab === 'browse' }"
-          @click="activeTab = 'browse'"
-        >
+        <button class="tab-btn" :class="{ active: activeTab === 'browse' }" @click="activeTab = 'browse'">
           🔍 {{ t('user.browseEvents') }}
           <span class="tab-count">{{ events.length }}</span>
         </button>
-        <button
-          class="tab-btn"
-          :class="{ active: activeTab === 'mine' }"
-          @click="activeTab = 'mine'"
-        >
+        <button class="tab-btn" :class="{ active: activeTab === 'mine' }" @click="activeTab = 'mine'">
           📋 {{ t('user.myRegistrations') }}
           <span class="tab-count">{{ myRegistrations.length }}</span>
         </button>
@@ -67,17 +54,10 @@
 
       <!-- ══ BROWSE EVENTS TAB ══ -->
       <div v-if="activeTab === 'browse'">
-
-        <!-- Search -->
         <div class="search-bar">
           <div class="search-wrap">
             <span class="search-icon">🔍</span>
-            <input
-              v-model="search"
-              type="text"
-              :placeholder="t('user.searchPlaceholder')"
-              class="search-input"
-            />
+            <input v-model="search" type="text" :placeholder="t('user.searchPlaceholder')" class="search-input" />
           </div>
           <select v-model="sortBy" class="sort-select">
             <option value="date">{{ t('user.sortByDate') }}</option>
@@ -86,7 +66,6 @@
           </select>
         </div>
 
-        <!-- Empty -->
         <div v-if="filteredEvents.length === 0" class="empty-state">
           <div class="empty-icon">🗓</div>
           <h3>{{ t('user.noEventsFound') }}</h3>
@@ -94,7 +73,6 @@
           <button v-if="search" @click="search = ''" class="btn-outline">{{ t('user.clearSearch') }}</button>
         </div>
 
-        <!-- Events Grid -->
         <div v-else class="events-grid">
           <div v-for="event in filteredEvents" :key="event.id" class="event-card">
 
@@ -114,7 +92,6 @@
               <span>👥 {{ event.capacity }} {{ t('user.capacity') }}</span>
             </div>
 
-            <!-- Capacity Bar -->
             <div class="capacity-bar">
               <div
                 class="capacity-fill"
@@ -123,10 +100,13 @@
               ></div>
             </div>
 
-            <!-- Action -->
+            <!-- ✅ Updated Action section -->
             <div class="card-action">
-              <span v-if="event.is_registered" class="registered-tag">
+              <span v-if="event.my_status === 'registered'" class="registered-tag">
                 ✅ {{ t('user.registered') }}
+              </span>
+              <span v-else-if="event.my_status === 'pending'" class="pending-tag">
+                ⏳ {{ t('user.pending') }}
               </span>
               <button
                 v-else-if="event.spots_left > 0"
@@ -145,7 +125,6 @@
       <!-- ══ MY REGISTRATIONS TAB ══ -->
       <div v-if="activeTab === 'mine'">
 
-        <!-- Empty -->
         <div v-if="myRegistrations.length === 0" class="empty-state">
           <div class="empty-icon">📋</div>
           <h3>{{ t('user.noRegistrationsYet') }}</h3>
@@ -153,7 +132,6 @@
           <button class="btn-primary" @click="activeTab = 'browse'">{{ t('user.browseEvents') }} →</button>
         </div>
 
-        <!-- Registrations List -->
         <div v-else class="registrations-list">
           <div
             v-for="reg in myRegistrations"
@@ -175,11 +153,15 @@
               <span class="event-status-badge" :class="reg.event_status">
                 {{ reg.event_status }}
               </span>
+
+              <!-- ✅ Updated status badge with pending -->
               <span class="reg-status-badge" :class="reg.status">
-                {{ reg.status }}
+                {{ reg.status === 'pending' ? t('user.pendingApproval') : reg.status }}
               </span>
+
+              <!-- ✅ Cancel button for both pending and registered -->
               <button
-                v-if="reg.status === 'registered' && reg.event_status === 'open'"
+                v-if="(reg.status === 'pending' || reg.status === 'registered') && reg.event_status === 'open'"
                 class="btn-cancel"
                 @click="cancelRegistration(reg)"
               >
@@ -272,5 +254,11 @@ function logout() {
 <style scoped>
 @import './css/Dashboard.css';
 
-
+/* ✅ New pending styles */
+.pending-tag {
+  display: block; text-align: center; padding: 0.65rem;
+  background: #fef3c7; color: #b45309; border-radius: 0.5rem;
+  font-size: 0.875rem; font-weight: 700;
+}
+.reg-status-badge.pending { background: #fef3c7; color: #b45309; }
 </style>
