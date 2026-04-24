@@ -136,6 +136,8 @@ export default {
         cancel: "Annuler",
         cancelConfirm: "Annuler votre inscription à cet événement?",
         builtWith: "Construit avec Laravel & Vue.js",
+        pending: 'En attente',
+        pendingApproval: 'En attente d\'approbation',
     },
     org: {
         overview: "Vue d'ensemble",
@@ -221,6 +223,9 @@ export default {
         creating: "Création en cours...",
         publishEvent: "Publier l'événement",
         builtWith: "Construit avec Laravel & Vue.js",
+        pending: 'En attente',
+        approve: 'Approuver',
+        reject: 'Rejeter',
     },
     admin: {
         dashboard: "Tableau de bord",

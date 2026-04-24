@@ -130,6 +130,8 @@ user: {
   cancel: 'Cancel',
   cancelConfirm: 'Cancel your registration for this event?',
   builtWith: 'Built with Laravel & Vue.js',
+  pending: 'Pending',
+  pendingApproval: 'Pending Approval',
 },
 org: {
   overview: 'Overview',
@@ -213,6 +215,9 @@ org: {
   creating: 'Creating Event...',
   publishEvent: 'Publish Event',
   builtWith: 'Built with Laravel & Vue.js',
+  pending: 'Pending',
+  approve: 'Approve',
+  reject: 'Reject',
 },
 admin: {
   dashboard: 'Dashboard',
