@@ -6,6 +6,8 @@
       <div class="nav-inner">
         <a href="/" class="logo">⚡ EventHub</a>
         <div class="nav-right">
+          <!-- ✅ My Events only for organizer -->
+          <a v-if="user.role === 'organizer'" href="/organizer/events" class="btn-outline">← {{ t('org.myEvents') }}</a>
           <span class="role-chip" :class="user.role">{{ user.role }}</span>
           <span class="user-name">{{ user.name }}</span>
           <a v-if="user.role === 'organizer'" href="/organizer/events/create" class="btn-create">
@@ -18,7 +20,34 @@
           </div>
           <button @click="logout" class="btn-logout">{{ t('user.logout') }}</button>
         </div>
+
+        <!-- ✅ Hamburger button -->
+        <button class="mobile-menu-btn" @click="mobileOpen = !mobileOpen">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
       </div>
+
+      <!-- ✅ Mobile Menu -->
+      <transition name="slide">
+        <div v-if="mobileOpen" class="mobile-menu">
+          <a v-if="user.role === 'organizer'" href="/organizer/events" class="mobile-link" @click="mobileOpen = false">
+            ← {{ t('org.myEvents') }}
+          </a>
+          <a v-if="user.role === 'organizer'" href="/organizer/events/create" class="mobile-link" @click="mobileOpen = false">
+            + {{ t('user.createEvent') }}
+          </a>
+          <div class="mobile-divider"></div>
+          <div class="mobile-lang">
+            <button class="lang-btn" :class="{ active: locale === 'en' }" @click="switchLang('en')">EN</button>
+            <span class="lang-sep">|</span>
+            <button class="lang-btn" :class="{ active: locale === 'fr' }" @click="switchLang('fr')">FR</button>
+          </div>
+          <div class="mobile-divider"></div>
+          <button @click="logout" class="mobile-logout">{{ t('user.logout') }}</button>
+        </div>
+      </transition>
     </nav>
 
     <!-- HERO WELCOME -->
@@ -75,23 +104,19 @@
 
         <div v-else class="events-grid">
           <div v-for="event in filteredEvents" :key="event.id" class="event-card">
-
             <div class="card-top">
               <span class="card-badge" :class="getBadgeClass(event.spots_left)">
                 {{ event.spots_left > 0 ? event.spots_left + ' ' + t('user.spotsLeft') : t('user.full') }}
               </span>
               <span class="card-date">{{ event.date }}</span>
             </div>
-
             <h3 class="card-title">{{ event.title }}</h3>
             <p class="card-desc">{{ truncate(event.description, 100) }}</p>
-
             <div class="card-meta">
               <span>📍 {{ event.location }}</span>
               <span>👤 {{ event.organizer }}</span>
               <span>👥 {{ event.capacity }} {{ t('user.capacity') }}</span>
             </div>
-
             <div class="capacity-bar">
               <div
                 class="capacity-fill"
@@ -99,8 +124,6 @@
                 :class="getCapacityFillClass(event)"
               ></div>
             </div>
-
-            <!-- ✅ Updated Action section -->
             <div class="card-action">
               <span v-if="event.my_status === 'registered'" class="registered-tag">
                 ✅ {{ t('user.registered') }}
@@ -117,21 +140,18 @@
               </button>
               <span v-else class="full-tag">{{ t('user.eventFull') }}</span>
             </div>
-
           </div>
         </div>
       </div>
 
       <!-- ══ MY REGISTRATIONS TAB ══ -->
       <div v-if="activeTab === 'mine'">
-
         <div v-if="myRegistrations.length === 0" class="empty-state">
           <div class="empty-icon">📋</div>
           <h3>{{ t('user.noRegistrationsYet') }}</h3>
           <p>{{ t('user.noRegistrationsDesc') }}</p>
           <button class="btn-primary" @click="activeTab = 'browse'">{{ t('user.browseEvents') }} →</button>
         </div>
-
         <div v-else class="registrations-list">
           <div
             v-for="reg in myRegistrations"
@@ -150,16 +170,10 @@
               </div>
             </div>
             <div class="reg-right">
-              <span class="event-status-badge" :class="reg.event_status">
-                {{ reg.event_status }}
-              </span>
-
-              <!-- ✅ Updated status badge with pending -->
+              <span class="event-status-badge" :class="reg.event_status">{{ reg.event_status }}</span>
               <span class="reg-status-badge" :class="reg.status">
                 {{ reg.status === 'pending' ? t('user.pendingApproval') : reg.status }}
               </span>
-
-              <!-- ✅ Cancel button for both pending and registered -->
               <button
                 v-if="(reg.status === 'pending' || reg.status === 'registered') && reg.event_status === 'open'"
                 class="btn-cancel"
@@ -170,7 +184,6 @@
             </div>
           </div>
         </div>
-
       </div>
     </div>
 
@@ -194,15 +207,17 @@ const props = defineProps({
   myRegistrations: { type: Array, default: () => [] },
 });
 
-const page      = usePage();
-const user      = page.props.auth.user;
-const activeTab = ref('browse');
-const search    = ref('');
-const sortBy    = ref('date');
+const page       = usePage();
+const user       = page.props.auth.user;
+const activeTab  = ref('browse');
+const search     = ref('');
+const sortBy     = ref('date');
+const mobileOpen = ref(false); // ✅ mobile menu state
 
 function switchLang(lang) {
   locale.value = lang;
   localStorage.setItem('locale', lang);
+  mobileOpen.value = false;
 }
 
 const userInitials = computed(() =>
@@ -254,11 +269,55 @@ function logout() {
 <style scoped>
 @import './css/Dashboard.css';
 
-/* ✅ New pending styles */
 .pending-tag {
   display: block; text-align: center; padding: 0.65rem;
   background: #fef3c7; color: #b45309; border-radius: 0.5rem;
   font-size: 0.875rem; font-weight: 700;
 }
 .reg-status-badge.pending { background: #fef3c7; color: #b45309; }
+
+/* ✅ Hamburger button */
+.mobile-menu-btn {
+  display: none; flex-direction: column; gap: 5px;
+  background: none; border: none; cursor: pointer;
+  padding: 0.5rem; border-radius: 0.5rem; transition: background 0.2s;
+}
+.mobile-menu-btn:hover { background: #f1f5f9; }
+.mobile-menu-btn span {
+  display: block; width: 22px; height: 2px;
+  background: #475569; border-radius: 999px;
+}
+
+/* ✅ Mobile Menu */
+.mobile-menu {
+  border-top: 1px solid #e2e8f0; padding: 1rem 1.5rem;
+  display: flex; flex-direction: column; gap: 0.25rem;
+  background: white;
+}
+.mobile-link {
+  padding: 0.75rem 1rem; border-radius: 0.5rem;
+  font-size: 0.9rem; font-weight: 500; color: #475569;
+  text-decoration: none; transition: all 0.2s;
+}
+.mobile-link:hover { background: #f1f5f9; color: #0f172a; }
+.mobile-divider { height: 1px; background: #f1f5f9; margin: 0.5rem 0; }
+.mobile-lang { display: flex; align-items: center; gap: 0.25rem; padding: 0 0.5rem; }
+.mobile-logout {
+  padding: 0.75rem 1rem; background: none; border: 1.5px solid #e2e8f0;
+  color: #64748b; border-radius: 0.5rem; font-size: 0.9rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s; text-align: left;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+.mobile-logout:hover { border-color: #ef4444; color: #ef4444; }
+
+/* ✅ Slide transition */
+.slide-enter-active, .slide-leave-active { transition: all 0.25s ease; }
+.slide-enter-from, .slide-leave-to { opacity: 0; transform: translateY(-8px); }
+
+/* ✅ Responsive */
+@media (max-width: 768px) {
+  .nav-right { display: none; }
+  .mobile-menu-btn { display: flex; }
+  .user-name { display: none; }
+}
 </style>

@@ -11,9 +11,6 @@
         <a class="nav-item" :class="{ active: activeTab === 'events' }" @click="activeTab = 'events'">
           <span class="nav-icon">📅</span> {{ t('org.myEvents') }}
         </a>
-        <a class="nav-item" href="/">
-          <span class="nav-icon">🌐</span> {{ t('org.publicPage') }}
-        </a>
         <a class="nav-item" href="/dashboard">
           <span class="nav-icon">👤</span> {{ t('org.myDashboard') }}
         </a>

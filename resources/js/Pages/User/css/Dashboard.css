@@ -247,3 +247,11 @@
 .lang-btn:hover { color: #4f46e5; background: #eef2ff; }
 .lang-btn.active { color: #4f46e5; background: #eef2ff; }
 .lang-sep { color: #e2e8f0; font-size: 0.75rem; }
+
+.btn-outline {
+  border: 1.5px solid #e2e8f0; color: #475569;
+  padding: 0.45rem 1rem; border-radius: 0.5rem;
+  font-size: 0.875rem; font-weight: 600;
+  text-decoration: none; transition: all 0.2s;
+}
+
