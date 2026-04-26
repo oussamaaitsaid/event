@@ -2,6 +2,7 @@ import { createApp, h } from 'vue';
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import i18n from './i18n/index.js';
+import axios from 'axios';
 
 createInertiaApp({
     resolve: (name) =>

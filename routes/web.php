@@ -50,6 +50,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::patch('/users/{user}/toggle',[AdminController::class, 'toggleUserStatus'])->name('users.toggle');
     Route::patch('/users/{user}/role',  [AdminController::class, 'changeRole'])->name('users.role');
     Route::delete('/events/{event}',    [AdminController::class, 'deleteEvent'])->name('events.delete');
+    Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
 });
 
 
@@ -79,3 +80,7 @@ Route::middleware(['auth', 'role:organizer'])->prefix('organizer')->name('organi
     Route::get('/events/{event}/participants',[OrganizerController::class, 'participants'])->name('events.participants');
 });
 
+
+use App\Http\Controllers\ContactController;
+
+Route::middleware('auth')->post('/contact/organizer-request', [ContactController::class, 'send'])->name('contact.organizer');

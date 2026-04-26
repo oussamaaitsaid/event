@@ -201,6 +201,9 @@
                     <button class="btn-action info" @click="changeRole(u)">
                       → {{ u.role === 'user' ? t('admin.makeOrganizer') : t('admin.makeUser') }}
                     </button>
+                     <button class="btn-action danger" @click="deleteUser(u)">
+      {{ t('admin.delete') || 'Delete' }}
+    </button>
                   </div>
                   <span v-else class="cell-muted">—</span>
                 </td>
@@ -309,9 +312,15 @@ function deleteEvent(e) {
   }
 }
 function logout() { router.post('/logout'); }
+function deleteUser(u) {
+  if (confirm(`Delete "${u.name}"? This cannot be undone.`)) {
+    router.delete(`/admin/users/${u.id}`);
+  }
+}
 </script>
 
 <style scoped>
 @import './css/Dashboard.css';
 
 </style>
+

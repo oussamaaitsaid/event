@@ -90,6 +90,18 @@ class AdminController extends Controller
         return back();
     }
 
+    // ── Delete User ──
+    public function deleteUser(User $user)
+    {
+        if ($user->role === 'admin') {
+            return back()->withErrors(['error' => 'Cannot delete an admin.']);
+        }
+
+        $user->delete();
+
+        return back();
+    }
+
     // ── Change User Role ──
     public function changeRole(User $user)
     {

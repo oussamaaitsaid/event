@@ -6,7 +6,6 @@
       <div class="nav-inner">
         <a href="/" class="logo">⚡ EventHub</a>
         <div class="nav-right">
-          <!-- ✅ My Events only for organizer -->
           <a v-if="user.role === 'organizer'" href="/organizer/events" class="btn-outline">← {{ t('org.myEvents') }}</a>
           <span class="role-chip" :class="user.role">{{ user.role }}</span>
           <span class="user-name">{{ user.name }}</span>
@@ -21,15 +20,11 @@
           <button @click="logout" class="btn-logout">{{ t('user.logout') }}</button>
         </div>
 
-        <!-- ✅ Hamburger button -->
         <button class="mobile-menu-btn" @click="mobileOpen = !mobileOpen">
-          <span></span>
-          <span></span>
-          <span></span>
+          <span></span><span></span><span></span>
         </button>
       </div>
 
-      <!-- ✅ Mobile Menu -->
       <transition name="slide">
         <div v-if="mobileOpen" class="mobile-menu">
           <a v-if="user.role === 'organizer'" href="/organizer/events" class="mobile-link" @click="mobileOpen = false">
@@ -74,6 +69,10 @@
         <button class="tab-btn" :class="{ active: activeTab === 'mine' }" @click="activeTab = 'mine'">
           📋 {{ t('user.myRegistrations') }}
           <span class="tab-count">{{ myRegistrations.length }}</span>
+        </button>
+        <!-- ✅ Only for regular users -->
+        <button v-if="user.role === 'user'" class="tab-btn" :class="{ active: activeTab === 'become' }" @click="activeTab = 'become'">
+          🚀 {{ t('user.becomeOrganizer') }}
         </button>
       </div>
     </div>
@@ -124,21 +123,24 @@
                 :class="getCapacityFillClass(event)"
               ></div>
             </div>
+           <!-- ✅ After -->
             <div class="card-action">
-              <span v-if="event.my_status === 'registered'" class="registered-tag">
+            <div v-if="event.my_status === 'registered'" class="registered-tag">
                 ✅ {{ t('user.registered') }}
-              </span>
-              <span v-else-if="event.my_status === 'pending'" class="pending-tag">
+                <p class="status-msg">{{ t('user.registeredMsg') }}</p>
+            </div>
+            <div v-else-if="event.my_status === 'pending'" class="pending-tag">
                 ⏳ {{ t('user.pending') }}
-              </span>
-              <button
+                <p class="status-msg">{{ t('user.pendingMsg') }}</p>
+            </div>
+            <button
                 v-else-if="event.spots_left > 0"
                 class="btn-register"
                 @click="registerEvent(event)"
-              >
+            >
                 {{ t('user.registerNow') }}
-              </button>
-              <span v-else class="full-tag">{{ t('user.eventFull') }}</span>
+            </button>
+            <span v-else class="full-tag">{{ t('user.eventFull') }}</span>
             </div>
           </div>
         </div>
@@ -185,6 +187,48 @@
           </div>
         </div>
       </div>
+
+      <!-- ══ BECOME ORGANIZER TAB ══ -->
+      <div v-if="activeTab === 'become'">
+        <div class="become-wrapper">
+
+          <transition name="fade">
+            <div v-if="requestSuccess" class="alert-success">
+              ✅ {{ t('user.requestSent') }}
+            </div>
+          </transition>
+
+         <div v-if="form.errors.mail" class="alert-error">
+            ⚠ {{ form.errors.mail }}
+            </div>
+          <div class="become-card">
+            <div class="become-icon">🚀</div>
+            <h2 class="become-title">{{ t('user.becomeOrganizerTitle') }}</h2>
+            <p class="become-sub">{{ t('user.becomeOrganizerDesc') }}</p>
+
+            <form @submit.prevent="sendRequest" class="become-form">
+              <div class="field">
+                <label>{{ t('user.whyOrganizer') }}</label>
+                <textarea
+                  v-model="requestMessage"
+                  rows="5"
+                  :placeholder="t('user.whyOrganizerPlaceholder')"
+                  class="become-textarea"
+                  :class="{ 'input-error': requestError }"
+                ></textarea>
+                <span v-if="requestError" class="field-error">{{ requestError }}</span>
+                <span class="char-count">{{ requestMessage.length }} / 1000</span>
+              </div>
+              <button type="submit" class="btn-become" :disabled="form.processing">
+                <span v-if="form.processing">{{ t('user.sending') }}</span>
+                <span v-else>{{ t('user.sendRequest') }} →</span>
+              </button>
+            </form>
+          </div>
+
+        </div>
+      </div>
+
     </div>
 
     <!-- FOOTER -->
@@ -197,7 +241,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { usePage, router } from '@inertiajs/vue3';
+import { usePage, router, useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 
 const { t, locale } = useI18n();
@@ -212,7 +256,13 @@ const user       = page.props.auth.user;
 const activeTab  = ref('browse');
 const search     = ref('');
 const sortBy     = ref('date');
-const mobileOpen = ref(false); // ✅ mobile menu state
+const mobileOpen = ref(false);
+
+// ── Become Organizer ──
+const requestMessage = ref('');
+const requestSuccess = ref(false);
+const requestError   = ref('');
+const form           = useForm({ message: '' });
 
 function switchLang(lang) {
   locale.value = lang;
@@ -264,6 +314,29 @@ function cancelRegistration(reg) {
 function logout() {
   router.post('/logout');
 }
+
+function sendRequest() {
+  requestError.value = '';
+
+  if (requestMessage.value.length < 20) {
+    requestError.value = 'Please write at least 20 characters.';
+    return;
+  }
+
+  form.message = requestMessage.value;
+
+  form.post('/contact/organizer-request', {
+    onSuccess: () => {
+      requestSuccess.value = true;
+      requestMessage.value = '';
+      form.reset();
+      setTimeout(() => requestSuccess.value = false, 5000);
+    },
+    onError: () => {
+      requestError.value = 'Something went wrong. Please try again.';
+    },
+  });
+}
 </script>
 
 <style scoped>
@@ -276,7 +349,7 @@ function logout() {
 }
 .reg-status-badge.pending { background: #fef3c7; color: #b45309; }
 
-/* ✅ Hamburger button */
+/* ── Hamburger ── */
 .mobile-menu-btn {
   display: none; flex-direction: column; gap: 5px;
   background: none; border: none; cursor: pointer;
@@ -288,16 +361,14 @@ function logout() {
   background: #475569; border-radius: 999px;
 }
 
-/* ✅ Mobile Menu */
+/* ── Mobile Menu ── */
 .mobile-menu {
   border-top: 1px solid #e2e8f0; padding: 1rem 1.5rem;
-  display: flex; flex-direction: column; gap: 0.25rem;
-  background: white;
+  display: flex; flex-direction: column; gap: 0.25rem; background: white;
 }
 .mobile-link {
-  padding: 0.75rem 1rem; border-radius: 0.5rem;
-  font-size: 0.9rem; font-weight: 500; color: #475569;
-  text-decoration: none; transition: all 0.2s;
+  padding: 0.75rem 1rem; border-radius: 0.5rem; font-size: 0.9rem;
+  font-weight: 500; color: #475569; text-decoration: none; transition: all 0.2s;
 }
 .mobile-link:hover { background: #f1f5f9; color: #0f172a; }
 .mobile-divider { height: 1px; background: #f1f5f9; margin: 0.5rem 0; }
@@ -309,15 +380,63 @@ function logout() {
   font-family: 'Segoe UI', system-ui, sans-serif;
 }
 .mobile-logout:hover { border-color: #ef4444; color: #ef4444; }
-
-/* ✅ Slide transition */
 .slide-enter-active, .slide-leave-active { transition: all 0.25s ease; }
 .slide-enter-from, .slide-leave-to { opacity: 0; transform: translateY(-8px); }
 
-/* ✅ Responsive */
 @media (max-width: 768px) {
   .nav-right { display: none; }
   .mobile-menu-btn { display: flex; }
   .user-name { display: none; }
+}
+
+/* ── Become Organizer ── */
+.become-wrapper {
+  max-width: 600px; margin: 0 auto; padding: 2rem 0;
+  display: flex; flex-direction: column; gap: 1.5rem;
+}
+.alert-success {
+  background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d;
+  padding: 0.875rem 1rem; border-radius: 0.5rem;
+  font-size: 0.9rem; font-weight: 600;
+}
+.alert-error {
+  background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c;
+  padding: 0.875rem 1rem; border-radius: 0.5rem; font-size: 0.875rem;
+}
+.become-card {
+  background: white; border-radius: 1rem; padding: 2rem;
+  border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 1rem;
+}
+.become-icon { font-size: 2.5rem; }
+.become-title { font-size: 1.4rem; font-weight: 800; color: #0f172a; }
+.become-sub { font-size: 0.9rem; color: #64748b; line-height: 1.65; }
+.become-form { display: flex; flex-direction: column; gap: 1rem; }
+.field { display: flex; flex-direction: column; gap: 0.4rem; }
+.field label { font-size: 0.875rem; font-weight: 700; color: #374151; }
+.become-textarea {
+  width: 100%; padding: 0.75rem 1rem;
+  border: 1.5px solid #e2e8f0; border-radius: 0.5rem;
+  font-size: 0.95rem; color: #0f172a; background: white;
+  outline: none; transition: border-color 0.2s; resize: vertical;
+  min-height: 140px; font-family: 'Segoe UI', system-ui, sans-serif;
+}
+.become-textarea:focus { border-color: #4f46e5; }
+.become-textarea.input-error { border-color: #f87171; }
+.field-error { font-size: 0.78rem; color: #ef4444; font-weight: 600; }
+.char-count { font-size: 0.75rem; color: #94a3b8; text-align: right; }
+.btn-become {
+  width: 100%; padding: 0.8rem; background: #4f46e5; color: white;
+  border: none; border-radius: 0.5rem; font-size: 1rem; font-weight: 700;
+  cursor: pointer; transition: background 0.2s;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+.btn-become:hover:not(:disabled) { background: #4338ca; }
+.btn-become:disabled { opacity: 0.7; cursor: not-allowed; }
+.fade-enter-active, .fade-leave-active { transition: opacity 0.25s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+
+.status-msg {
+  font-size: 0.75rem; font-weight: 500;
+  margin-top: 0.3rem; opacity: 0.85;
 }
 </style>
