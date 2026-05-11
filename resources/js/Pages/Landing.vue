@@ -175,7 +175,7 @@
       <!-- Grid -->
       <div v-else class="events-grid">
         <div
-          v-for="event in filteredEvents"
+           v-for="event in filteredEvents.slice(0, 3)"
           :key="event.id"
           class="event-card"
           @click="openModal(event)"
